@@ -15,6 +15,7 @@ The following is the observed utilities and policies for each setting
 
 Setting I: 
 Utilities and Policy for the Given Wumpus World:
+
 -0.38 → | 0.23 → | 2.76 → | 13.24 → |
 
 -0.52 → | -0.35 → | 0.32 ↑ | 2.86 ↑ |
@@ -25,6 +26,7 @@ Utilities and Policy for the Given Wumpus World:
 
 Setting II: 
 Utilities and Policy for the Given Wumpus World:
+
 1.91 → | 4.55 → | 9.86 → | 20.58 → |
 
 0.78 → | 2.30 → | 5.06 ↑ | 10.37 ↑ |
@@ -35,6 +37,7 @@ Utilities and Policy for the Given Wumpus World:
 
 Setting III: 
 Utilities and Policy for the Given Wumpus World:
+
 40.16 → | 46.89 → | 55.51 → | 66.63 → |
 
 36.41 → | 42.24 → | 48.96 → | 57.02 ↑ |
