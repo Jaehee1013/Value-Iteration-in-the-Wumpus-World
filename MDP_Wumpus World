@@ -1,0 +1,113 @@
+import numpy as np
+
+# Helper function to get the next state
+def get_next_state(s, action, grid_size):
+    if action == 'UP':
+        return max(s - grid_size, 0)
+    elif action == 'DOWN':
+        return min(s + grid_size, grid_size**2 - 1)
+    elif action == 'LEFT':
+        return s if s % grid_size == 0 else s - 1
+    elif action == 'RIGHT':
+        return s if (s + 1) % grid_size == 0 else s + 1
+    return s
+
+# Value Iteration Function, Students need to implement the following loop
+def MDP_value_iteration(S, A, P, R, gamma, eta, max_iter):
+    # Input: S, A, P, R, gamma, eta, max_iter
+    # S: set of states, stored as a list of integers
+    # A: set of actions, stored as a list of strings, e.g. ['UP', 'DOWN', 'LEFT', 'RIGHT']
+    # P: transition probabilities matrix, stored as a 3D numpy array, P[s',s,a] = P(s'|s,a)
+    # R: reward function, stored as a 1D numpy array, R[s] = R(s)
+    # gamma: discount factor
+    # eta: convergence factor
+    # max_iter: maximum number of iterations
+    # Initialize the utilities for each state as zeros
+    U = np.zeros(len(S))
+
+    for i in range(max_iter):
+        # Create a copy of the current utility values
+        U_prev = U.copy()
+        
+        # Iterate over all states in S
+        for s in S:
+                        
+            action_utilities = [sum(P[s][a].get(s_prime, 0) * U_prev[s_prime] for s_prime in S) for a in A]
+            U[s] = R[s] + gamma * max(action_utilities)  # Corrected line
+            
+            
+        if all(abs(U[s] - U_prev[s]) < eta for s in S):
+            break
+        
+    # Return the final utilities
+    return U
+
+# Policy Generation Function
+def MDP_policy(S, A, P, U):
+    # policy[s] is the best action to take in state s, firstly set it to 0 for all states
+    policy = np.zeros(len(S), dtype=int)
+    
+    for s in S:
+       
+        max_action_utility = -np.inf
+        max_action = None
+        for a in A:
+            action_utilities = []
+            for s_prime in S:
+                R = P[s][a].get(s_prime, 0) * U[s_prime]
+                action_utilities.append(R)    
+            action_utility = sum(action_utilities)
+            if action_utility > max_action_utility:
+                max_action_utility = action_utility
+                max_action = a
+
+        policy[s] = A.index(max_action)
+        
+    return policy
+
+# Define the Wumpus world
+grid_size = 4  # 4x4 grid
+S = range(grid_size**2)  # States
+A = ['RIGHT', 'LEFT', 'DOWN', 'UP']  # Actions
+
+# Define the transition probabilities with stochastic movement
+# P[s][a][s'] = P(s'|s,a)
+P = {s: {a: {} for a in A} for s in S}
+for s in S:
+    for a in A:
+        intended_state = get_next_state(s, a, grid_size)
+        P[s][a][intended_state] = 0.8
+        if a in ['LEFT', 'RIGHT']:
+            P[s][a][get_next_state(s, 'UP', grid_size)] = 0.1
+            P[s][a][get_next_state(s, 'DOWN', grid_size)] = 0.1
+        else:
+            P[s][a][get_next_state(s, 'LEFT', grid_size)] = 0.1
+            P[s][a][get_next_state(s, 'RIGHT', grid_size)] = 0.1
+
+# Define the rewards for each state
+R = [-0.4] * 16
+R[3] = 10   # Gold
+R[10] = -5  # Pit
+R[14] = -5  # Pit
+R[13] = -10 # Wumpus
+
+# Run value iteration
+gamma = 0.9
+eta = 0.1
+max_iter = 10000
+U = MDP_value_iteration(S, A, P, R, gamma, eta, max_iter)
+
+# Policy representation for printing
+policy_repr = {0: '→', 1: '←', 2: '↓', 3: '↑'} 
+
+# Generate policy
+policy = MDP_policy(S, A, P, U)
+
+# Print utilities and policy in a 4x4 grid
+print("Utilities and Policy for the Given Wumpus World:")
+for i in range(grid_size):
+    for j in range(grid_size):
+        state = i * grid_size + j
+        print(f"{U[state]:.2f} {policy_repr[policy[state]]}", end=" | ")
+    print()
+
